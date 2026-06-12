@@ -77,6 +77,7 @@
           <div class="car" id="car">🚗</div>
           <div class="camera" id="camera"><div class="cone"></div>📷</div>
           <div class="gate" id="gate"></div>
+          <div class="gate-post" aria-hidden="true"></div>
           <div class="badge" id="scene-badge"></div>
         </div>
       </div>
@@ -85,14 +86,14 @@
       <div class="phase diagram" id="phase-diagram">
         <div class="stage" id="stage">
           <svg class="edges" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-            <line x1="6"  y1="42" x2="32" y2="14"/>
-            <line x1="6"  y1="42" x2="32" y2="68"/>
+            <line x1="11" y1="42" x2="32" y2="14"/>
+            <line x1="11" y1="42" x2="32" y2="68"/>
             <line x1="32" y1="68" x2="58" y2="42"/>
             <line x1="58" y1="42" x2="32" y2="14"/>
             <line x1="58" y1="42" x2="80" y2="20"/>
             <line x1="80" y1="20" x2="80" y2="64"/>
           </svg>
-          <div class="node" id="n-cam"       data-name="Camera-mock"     style="left:6%;  top:42%;">📷<span>camera-mock</span></div>
+          <div class="node" id="n-cam"       data-name="Camera-mock"     style="left:11%; top:42%;">📷<span>camera-mock</span></div>
           <div class="node" id="n-minio"     data-name="MinIO"          style="left:32%; top:14%;">🗄️<span>MinIO</span></div>
           <div class="node" id="n-redis"     data-name="Redis"          style="left:32%; top:68%;">📨<span>Redis</span></div>
           <div class="node" id="n-worker"    data-name="Worker-portaria" style="left:58%; top:42%;">🧠<span>worker-portaria</span></div>

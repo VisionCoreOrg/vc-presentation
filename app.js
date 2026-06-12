@@ -165,6 +165,7 @@ render();
       settled = true;
       clearTimeout(fallback);
       particle.removeEventListener('transitionend', done);
+      particle.style.opacity = '0';               // absorbed by the destination node (its glow holds the data)
       $(NODE_EL[to]).classList.add('lit');
       busy = false;
       onArrive && onArrive();
