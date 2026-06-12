@@ -73,3 +73,49 @@ document.addEventListener('keydown', (e) => {
 });
 
 render();
+
+/* ---------- Slide 5: pipeline state machine ---------- */
+(function pipeline() {
+  const STEPS = [
+    { phase: 'scene',    action: 'carArrives' },
+    { phase: 'scene',    action: 'cameraDetects' },
+    { phase: 'diagram',  from: 'cam',    to: 'minio',     op: 'S3 PUT',   panel: 'minio' },
+    { phase: 'diagram',  from: 'cam',    to: 'redis',     op: 'LPUSH',    panel: 'redis' },
+    { phase: 'diagram',  from: 'redis',  to: 'worker',    op: 'BLPOP',    panel: 'worker' },
+    { phase: 'diagram',  from: 'worker', to: 'minio',     op: 'S3 GET',   panel: 'minio' },
+    { phase: 'diagram',  from: 'worker', to: 'api',       op: 'HTTP POST',panel: 'api' },
+    { phase: 'diagram',  from: 'api',    to: 'dashboard', op: 'HTTP GET', panel: 'dashboard' },
+    { phase: 'conclusao',action: 'gateOpens' },
+  ];
+
+  const PANELS = {
+    minio:     { name: 'MinIO',            desc: 'Guarda a imagem (object storage).' },
+    redis:     { name: 'Redis',            desc: 'Fila de eventos entre os serviços.' },
+    worker:    { name: 'Worker-portaria',  desc: 'Detecta a placa com IA e lê o texto.' },
+    api:       { name: 'API-core',         desc: 'Registra a transação.' },
+    dashboard: { name: 'Dashboard',        desc: 'Operador vê em tempo real.' },
+  };
+
+  const NODE_EL = {
+    cam: 'n-cam', minio: 'n-minio', redis: 'n-redis',
+    worker: 'n-worker', api: 'n-api', dashboard: 'n-dashboard',
+  };
+
+  let idx = -1;       // -1 = not started; 0..STEPS.length-1 = step done
+  let busy = false;   // true while a particle/transition is mid-flight
+
+  const $ = (id) => document.getElementById(id);
+
+  function reset() { /* filled in Task 7d */ }
+  function advance() { /* filled in Task 7d */ }
+
+  // Wire into the global hooks (replaces the no-ops from Task 1)
+  window.VC.hooks.onEnterSlide5 = () => { if (idx === -1) reset(); };
+  window.VC.hooks.advancePipeline = advance;
+  window.VC.hooks.resetPipeline = reset;
+  window.VC.hooks.isPipelineActive = () => idx > -1 && idx < STEPS.length - 1;
+
+  // expose for the next sub-tasks
+  window.VC._pipeline = { STEPS, PANELS, NODE_EL, $, get idx(){return idx;}, set idx(v){idx=v;},
+                          get busy(){return busy;}, set busy(v){busy=v;} };
+})();
