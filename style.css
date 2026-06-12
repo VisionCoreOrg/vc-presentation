@@ -266,7 +266,7 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   SLIDE 2 — PIPELINE SIMULATOR
+   SLIDE 2 — PIPELINE (step-by-step)
 ══════════════════════════════════════════════════════════════ */
 #slide-pipeline {
   padding-bottom: 28px;
@@ -274,117 +274,59 @@ body {
   justify-content: space-between;
 }
 
-.pipeline-header {
-  display: flex; justify-content: space-between; align-items: flex-start;
-  position: relative; z-index: 2; margin-bottom: 20px;
-}
-.sim-controls {
-  display: flex; align-items: center; gap: 10px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  padding: 8px 10px; border-radius: 14px;
-}
-.sim-btn {
-  display: flex; align-items: center; gap: 8px;
-  font-family: var(--mono); font-size: 11px;
-  letter-spacing: .08em;
-  background: rgba(255,255,255,.05);
-  border: 1px solid var(--border2);
-  color: var(--text); padding: 8px 16px;
-  border-radius: 10px; cursor: pointer;
-  transition: background .2s, border-color .2s;
-}
-.sim-btn:hover { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.15); }
-.sim-btn-dot { width: 8px; height: 8px; border-radius: 50%; }
-.sim-btn-dot.cyan    { background: var(--cyan); box-shadow: 0 0 6px var(--cyan); }
-.sim-btn-dot.rose    { background: var(--rose); }
-.sim-btn-dot.pulsing { animation: dot-ping .8s ease-in-out infinite; }
-@keyframes dot-ping {
-  0%,100% { opacity:1; transform:scale(1); }
-  50% { opacity:.5; transform:scale(.7); }
+.pipeline-slide-header {
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+  margin-bottom: 12px;
 }
 
-#minio-badge {
-  font-family: var(--mono); font-size: 9px;
-  letter-spacing: .14em; font-weight: 600;
-  padding: 5px 12px; border-radius: 6px;
-  border: 1px solid; transition: all .4s;
-}
-#minio-badge.online  { color: var(--emerald); border-color: rgba(16,185,129,.3); background: rgba(16,185,129,.08); }
-#minio-badge.offline { color: var(--rose);    border-color: rgba(244,63,94,.4);  background: rgba(244,63,94,.12); }
-
-/* ─── Pipeline SVG ──────────────────────────────────────── */
-.pipeline-svg-wrap {
-  position: relative; z-index: 2;
-  flex: 0 0 auto;
-  max-width: 1100px;
-  width: 100%;
-  margin-left: auto;
-  margin-right: auto;
-}
-#pipelineSvg {
-  width: 100%; height: auto;
-  overflow: visible;
+/* ─── Layers container ─────────────────────────────────── */
+.pipeline-layers {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  margin: 0 -64px; /* bleed to slide edges, compensate for slide padding */
 }
 
-/* SVG Node styles */
-.p-node-bg {
-  fill: var(--card2);
-  stroke: var(--border2);
-  stroke-width: 1;
-  rx: 12; ry: 12;
-  transition: filter .3s;
-}
-.p-node-bg.active-node {
-  stroke: var(--cyan);
-  filter: drop-shadow(0 0 8px rgba(6,182,212,.5));
-}
-.p-node-bg.active-node-rose {
-  stroke: var(--rose);
-  filter: drop-shadow(0 0 8px rgba(244,63,94,.5));
-}
-.p-node-bg.minio-offline {
-  stroke: rgba(244,63,94,.4);
-  opacity: .4;
+.car-layer,
+.pipeline-layer {
+  position: absolute;
+  inset: 0;
+  transition: opacity 0.4s ease;
 }
 
-.p-node-icon { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
-.p-node-label { font-family: var(--mono); font-size: 10px; fill: var(--text); font-weight: 600; letter-spacing: .04em; }
-.p-node-sub   { font-family: var(--mono); font-size: 8px;  fill: var(--text3); letter-spacing: .06em; }
-
-.p-edge { fill: none; stroke: var(--border2); stroke-width: 1.5; marker-end: url(#arrowGray); }
-.p-edge.active-edge { stroke: var(--cyan); marker-end: url(#arrowCyan); transition: stroke .2s; }
-.p-edge.active-edge-rose { stroke: var(--rose); marker-end: url(#arrowRose); }
-
-.p-edge-label { font-family: var(--mono); font-size: 8px; fill: var(--text3); letter-spacing: .08em; }
-
-/* Particle */
-#particle {
-  r: 5;
-  fill: var(--cyan);
-  filter: drop-shadow(0 0 6px var(--cyan));
-  opacity: 0;
-  transition: fill .2s;
+/* Phase visibility */
+#slide-pipeline[data-phase="idle"] .car-layer,
+#slide-pipeline[data-phase="external"] .car-layer,
+#slide-pipeline[data-phase="conclusion"] .car-layer {
+  opacity: 1; pointer-events: auto;
+}
+#slide-pipeline[data-phase="idle"] .pipeline-layer,
+#slide-pipeline[data-phase="external"] .pipeline-layer,
+#slide-pipeline[data-phase="conclusion"] .pipeline-layer {
+  opacity: 0; pointer-events: none;
+}
+#slide-pipeline[data-phase="pipeline"] .car-layer {
+  opacity: 0; pointer-events: none;
+}
+#slide-pipeline[data-phase="pipeline"] .pipeline-layer {
+  opacity: 1; pointer-events: auto;
 }
 
-/* ─── Car Scene ─────────────────────────────────────────── */
-.car-scene {
-  position: relative; z-index: 2;
-  height: 110px;
-  flex: 0 0 110px;
-  background: linear-gradient(180deg, transparent 0%, rgba(6,182,212,.03) 100%);
+/* ─── Car layer inner scene ────────────────────────────── */
+.car-scene-inner {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 220px;
+  background: linear-gradient(180deg, transparent 0%, rgba(7,239,92,.015) 100%);
   border-top: 1px solid var(--border);
-  border-radius: 0 0 0 0;
   overflow: hidden;
-  display: flex; align-items: flex-end;
-  margin: 12px -64px -28px;
-  padding: 0 64px;
 }
 
-/* Road */
 .road {
   position: absolute; bottom: 0; left: 0; right: 0;
-  height: 36px;
+  height: 50px;
   background: #0a1220;
   border-top: 1px solid var(--border);
 }
@@ -397,93 +339,165 @@ body {
   transform: translateY(-50%);
 }
 
-/* Camera mount */
 .cam-mount {
-  position: absolute; left: 80px; bottom: 36px;
+  position: absolute; left: 120px; bottom: 50px;
   display: flex; flex-direction: column; align-items: center;
   z-index: 3;
 }
 .cam-pole {
-  width: 2px; height: 32px;
+  width: 2px; height: 60px;
   background: linear-gradient(180deg, var(--border2), var(--border));
 }
 .cam-head {
-  width: 26px; height: 16px;
+  width: 36px; height: 22px;
   background: var(--card2); border: 1px solid var(--border2);
   border-radius: 4px;
   display: flex; align-items: center; justify-content: center;
-  color: var(--cyan);
+  color: var(--accent);
 }
-.cam-head svg { width: 14px; height: 14px; }
+.cam-head svg { width: 18px; height: 18px; }
+
 .cam-cone {
-  position: absolute; left: 26px; bottom: 36px;
+  position: absolute; left: 138px; bottom: 50px;
   width: 0; height: 0;
-  border-top: 20px solid transparent;
-  border-bottom: 20px solid transparent;
-  border-right: 60px solid rgba(6,182,212,.08);
+  border-top: 30px solid transparent;
+  border-bottom: 30px solid transparent;
+  border-right: 90px solid rgba(7,239,92,.05);
   border-left: none;
   transition: border-right-color .3s;
 }
-.cam-cone.flash { border-right-color: rgba(6,182,212,.4); }
+.cam-cone.flash { border-right-color: rgba(7,239,92,.4); }
 
-/* Gate */
 .gate-post {
-  position: absolute; left: 240px; bottom: 36px;
-  width: 10px; height: 52px;
+  position: absolute; left: 380px; bottom: 50px;
+  width: 12px; height: 80px;
   background: linear-gradient(180deg, var(--border2), var(--border));
   border-radius: 3px 3px 0 0;
   z-index: 3;
 }
 .gate-bar {
-  position: absolute; left: 245px; bottom: 87px;
-  width: 120px; height: 4px;
+  position: absolute; left: 388px; bottom: 129px;
+  width: 180px; height: 5px;
   background: linear-gradient(90deg, var(--rose), #ff6080);
-  border-radius: 2px;
+  border-radius: 3px;
   transform-origin: 0% 50%;
   transform: rotate(0deg);
   transition: transform .8s var(--ease-out);
   z-index: 3;
   box-shadow: 0 0 8px rgba(244,63,94,.4);
 }
-.gate-bar.open { transform: rotate(-90deg); box-shadow: 0 0 8px rgba(16,185,129,.4); background: linear-gradient(90deg, var(--emerald), #34d399); }
+.gate-bar.open {
+  transform: rotate(-90deg);
+  box-shadow: 0 0 12px rgba(7,239,92,.6);
+  background: linear-gradient(90deg, var(--emerald), #34d399);
+}
 
-/* Detection badge */
 #detect-badge {
-  position: absolute; left: 160px; bottom: 72px;
-  font-family: var(--mono); font-size: 9px;
+  position: absolute; left: 250px; bottom: 105px;
+  font-family: var(--mono); font-size: 10px;
   letter-spacing: .1em; font-weight: 600;
-  padding: 5px 10px; border-radius: 6px;
+  padding: 6px 12px; border-radius: 6px;
   opacity: 0; transform: translateY(6px);
   transition: opacity .3s, transform .3s;
   z-index: 5; white-space: nowrap;
 }
-#detect-badge.show {
-  opacity: 1; transform: translateY(0);
-}
-#detect-badge.ok {
-  color: var(--emerald); background: rgba(16,185,129,.12);
-  border: 1px solid rgba(16,185,129,.3);
-}
-#detect-badge.fail {
-  color: var(--rose); background: rgba(244,63,94,.12);
-  border: 1px solid rgba(244,63,94,.3);
-}
+#detect-badge.show  { opacity: 1; transform: translateY(0); }
+#detect-badge.ok    { color: var(--emerald); background: rgba(19,179,126,.12); border: 1px solid rgba(19,179,126,.3); }
+#detect-badge.fail  { color: var(--rose);    background: rgba(244,63,94,.12);  border: 1px solid rgba(244,63,94,.3); }
 
-/* Car */
 #sim-car {
-  position: absolute; bottom: 33px;
-  width: 120px;
-  transform: translateX(-400px);
+  position: absolute; bottom: 46px;
+  width: 180px;
+  transform: translateX(-600px);
   transition: none;
   z-index: 4;
 }
-#sim-car svg { width: 120px; fill: none; stroke: var(--text2); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+#sim-car svg {
+  width: 180px; fill: none; stroke: var(--text2);
+  stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+}
 .plate-chip {
-  position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
-  font-family: var(--mono); font-size: 8px; font-weight: 600;
+  position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+  font-family: var(--mono); font-size: 9px; font-weight: 600;
   letter-spacing: .1em; color: #090f1c;
   background: #e8f4ff; border-radius: 2px;
-  padding: 1px 5px; white-space: nowrap;
+  padding: 2px 6px; white-space: nowrap;
+}
+
+/* ─── Pipeline layer ───────────────────────────────────── */
+.pipeline-layer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 64px;
+}
+.pipeline-layer #pipelineSvg {
+  width: 100%; height: auto; max-height: 100%;
+  overflow: visible;
+}
+
+/* SVG node / edge styles (unchanged from original) */
+.p-node-bg {
+  fill: var(--card2); stroke: var(--border2); stroke-width: 1;
+  transition: filter .3s;
+}
+.p-node-bg.active-node {
+  stroke: var(--accent);
+  filter: drop-shadow(0 0 8px rgba(7,239,92,.5));
+}
+.p-node-icon { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.p-node-label { font-family: var(--mono); font-size: 10px; fill: var(--text); font-weight: 600; letter-spacing: .04em; }
+.p-node-sub   { font-family: var(--mono); font-size: 8px; fill: var(--text3); letter-spacing: .06em; }
+
+.p-edge { fill: none; stroke: var(--border2); stroke-width: 1.5; marker-end: url(#arrowGray); }
+.p-edge.active-edge { stroke: var(--accent); marker-end: url(#arrowAccent); transition: stroke .2s; }
+
+.p-edge-label { font-family: var(--mono); font-size: 8px; fill: var(--text3); letter-spacing: .08em; }
+
+#particle {
+  r: 5;
+  fill: #07EF5C;
+  filter: drop-shadow(0 0 6px #07EF5C);
+  opacity: 0;
+}
+
+/* ─── Step indicator ───────────────────────────────────── */
+#step-indicator {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0 4px;
+  position: relative;
+  z-index: 2;
+}
+.step-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.step-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--border2);
+  transition: background .3s, transform .3s, box-shadow .3s;
+}
+.step-dot.active {
+  background: var(--accent);
+  transform: scale(1.5);
+  box-shadow: 0 0 8px var(--accent);
+}
+.step-dot.done {
+  background: rgba(7,239,92,.35);
+}
+.step-phase-sep {
+  width: 1px; height: 14px;
+  background: var(--border2);
+  margin: 0 4px;
+}
+#step-label {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--text3); letter-spacing: .08em;
 }
 
 /* ═══════════════════════════════════════════════════════════
