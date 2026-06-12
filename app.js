@@ -130,7 +130,72 @@ render();
     $('gate').style.transform = 'rotate(0deg)';
     window.VC.state.pipelineComplete = false;
   }
-  function advance() { /* filled in Task 7d */ }
+  function showPanel(key, op) {
+    const p = PANELS[key];
+    $('sp-op').textContent = op;
+    $('sp-name').textContent = p.name;
+    $('sp-desc').textContent = p.desc;
+    $('side-panel').classList.add('show');
+  }
+
+  function centerOf(key) {
+    const stage = $('stage').getBoundingClientRect();
+    const r = $(NODE_EL[key]).getBoundingClientRect();
+    return { x: r.left + r.width/2 - stage.left, y: r.top + r.height/2 - stage.top };
+  }
+
+  function moveParticle(from, to, onArrive) {
+    const a = centerOf(from), b = centerOf(to);
+    const particle = $('particle');
+    busy = true;
+    // place at source instantly
+    particle.style.transition = 'none';
+    particle.style.left = a.x + 'px'; particle.style.top = a.y + 'px'; particle.style.opacity = '1';
+    void particle.offsetWidth; // force reflow
+    // travel to destination
+    particle.style.transition = 'left .7s ease, top .7s ease';
+    particle.style.left = b.x + 'px'; particle.style.top = b.y + 'px';
+    const done = () => {
+      particle.removeEventListener('transitionend', done);
+      $(NODE_EL[to]).classList.add('lit');
+      busy = false;
+      onArrive && onArrive();
+    };
+    particle.addEventListener('transitionend', done);
+  }
+
+  function advance() {
+    if (busy) return;                       // ignore input mid-flight
+    if (idx >= STEPS.length - 1) return;     // already finished
+    idx += 1;
+    const step = STEPS[idx];
+
+    if (step.phase === 'scene') {
+      setPhase('scene');
+      if (step.action === 'carArrives') {
+        $('car').style.left = '46%';
+      } else if (step.action === 'cameraDetects') {
+        $('camera').querySelector('.cone').style.opacity = '1';
+        const b = $('scene-badge'); b.textContent = 'PLACA DETECTADA'; b.style.opacity = '1';
+      }
+    } else if (step.phase === 'diagram') {
+      setPhase('diagram');
+      if (idx > 0 && STEPS[idx-1].phase !== 'diagram') clearNodes(); // entering diagram: clean slate
+      $(NODE_EL[step.from]).classList.add('lit');
+      moveParticle(step.from, step.to, () => {
+        $(NODE_EL[step.from]).classList.remove('lit'); // origin dims; destination stays lit
+        showPanel(step.panel, step.op);
+      });
+    } else if (step.phase === 'conclusao') {
+      setPhase('scene');
+      $('particle').style.opacity = '0';
+      $('side-panel').classList.remove('show');
+      $('gate').style.transform = 'rotate(-72deg)';
+      const b = $('scene-badge'); b.textContent = 'ACESSO LIBERADO ✓'; b.style.opacity = '1';
+      $('car').style.left = '120%';
+      window.VC.state.pipelineComplete = true; // releases forward deck nav
+    }
+  }
 
   // Wire into the global hooks (replaces the no-ops from Task 1)
   window.VC.hooks.onEnterSlide5 = () => { if (idx === -1) reset(); };
