@@ -72,6 +72,16 @@ body { font-family: var(--font-sans); }
   right: var(--slide-pad); display: flex; justify-content: space-between;
   color: var(--text-dim); font-size: 1rem; z-index: 1;
 }
+.arch-sub { color: var(--text-dim); max-width: 60ch; margin-top: 1.5vmin; }
+.svc-row { display: flex; gap: 2.5vmin; margin-top: 6vmin; flex-wrap: wrap; }
+.svc {
+  flex: 1 1 0; min-width: 16ch; background: var(--surface);
+  border: 1px solid rgba(7,239,92,.18); border-radius: 1vmin;
+  padding: 3vmin 2vmin; display: flex; flex-direction: column; gap: 1.2vmin;
+}
+.svc-tag { color: var(--neon); font-size: .9rem; letter-spacing: .1em; text-transform: uppercase; }
+.svc b { font-size: clamp(1.1rem, 2.2vmin, 1.5rem); }
+
 /* subtle neon grid backdrop */
 .cover-grid {
   position: absolute; inset: 0; opacity: .12;

@@ -57,7 +57,19 @@
         </div>
       </div>
     </section>
-    <section class="slide" id="s4" data-label="03 · ARQUITETURA"></section>
+    <section class="slide arch" id="s4" data-label="03 · ARQUITETURA">
+      <p class="kicker">Arquitetura</p>
+      <h1>Microsserviços containerizados, comunicação assíncrona.</h1>
+      <p class="arch-sub">Cada serviço roda isolado em seu container Docker e conversa
+         com os demais por mensagens — não por chamadas diretas acopladas.</p>
+      <div class="svc-row">
+        <div class="svc"><span class="svc-tag mono">borda</span><b>vc-camera-mock</b></div>
+        <div class="svc"><span class="svc-tag mono">storage</span><b>MinIO</b></div>
+        <div class="svc"><span class="svc-tag mono">fila</span><b>Redis</b></div>
+        <div class="svc"><span class="svc-tag mono">IA</span><b>vc-worker-portaria</b></div>
+        <div class="svc"><span class="svc-tag mono">api + ui</span><b>vc-api-core</b></div>
+      </div>
+    </section>
     <section class="slide" id="s5" data-label="03 · PIPELINE"></section>
     <section class="slide" id="s6" data-label="04 · DEMO AO VIVO"></section>
     <section class="slide" id="s7" data-label="05 · PRÓXIMOS PASSOS"></section>
