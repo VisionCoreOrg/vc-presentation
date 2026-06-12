@@ -52,6 +52,15 @@ body { font-family: var(--font-sans); }
             color: var(--neon); line-height: 1; }
 .stat p { color: var(--text-dim); margin-top: 1vmin; }
 
+.cards-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3vmin; margin-top: 5vmin; }
+.card {
+  background: var(--surface); border-radius: 1.2vmin; padding: 3.5vmin;
+  border: 1px solid rgba(7,239,92,.18);
+}
+.card h2 { color: var(--neon); font-size: clamp(1.3rem, 2.8vmin, 2rem); margin-bottom: 1.5vmin; }
+.card p { color: var(--text); }
+.solution h1 { max-width: 24ch; margin-top: 1.5vmin; }
+
 .cover { justify-content: center; align-items: flex-start; }
 .cover-body { position: relative; z-index: 1; }
 .wordmark { letter-spacing: -.02em; }
