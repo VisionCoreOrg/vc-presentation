@@ -147,6 +147,7 @@ body { font-family: var(--font-sans); }
   text-decoration: none; box-shadow: 0 0 3vmin rgba(7,239,92,.45); transition: transform .2s ease;
 }
 .demo-btn:hover { transform: scale(1.04); }
+.demo-btn:focus-visible { outline: 3px solid var(--neon); outline-offset: 4px; }
 .demo-hint { color: var(--text-dim); font-size: 1rem; }
 
 .roadmap h1 { max-width: 26ch; margin-top: 1.5vmin; }
