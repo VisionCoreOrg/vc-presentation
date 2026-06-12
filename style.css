@@ -1,11 +1,22 @@
+@font-face {
+  font-family: 'Space Grotesk'; src: url('fonts/SpaceGrotesk.woff2') format('woff2');
+  font-weight: 300 700; font-display: swap;
+}
+@font-face {
+  font-family: 'JetBrains Mono'; src: url('fonts/JetBrainsMono.woff2') format('woff2');
+  font-weight: 400 700; font-display: swap;
+}
+
 :root {
   --bg: #1D2938; --surface: #2A616E; --accent: #13B37E;
   --neon: #07EF5C; --text: #EAF2F0; --text-dim: #9DB4B0;
   --slide-pad: 6vmin;
+  --font-sans: 'Space Grotesk', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); }
-body { font-family: system-ui, sans-serif; }  /* replaced with Space Grotesk in Task 2 */
+body { font-family: var(--font-sans); }
 
 #deck { position: relative; height: 100vh; width: 100vw; }
 
@@ -26,3 +37,10 @@ body { font-family: system-ui, sans-serif; }  /* replaced with Space Grotesk in 
   position: fixed; bottom: 4vmin; right: 6vmin;
   font-size: 1rem; color: var(--text-dim);
 }
+
+.slide h1 { font-size: clamp(2.5rem, 6vmin, 5rem); font-weight: 600; line-height: 1.05; }
+.slide h2 { font-size: clamp(1.8rem, 4vmin, 3rem); font-weight: 600; }
+.slide p  { font-size: clamp(1.1rem, 2.2vmin, 1.6rem); color: var(--text); line-height: 1.4; }
+.mono { font-family: var(--font-mono); letter-spacing: .02em; }
+.kicker { font-family: var(--font-mono); color: var(--neon); letter-spacing: .12em;
+          text-transform: uppercase; font-size: 1rem; }
