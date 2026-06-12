@@ -44,3 +44,24 @@ body { font-family: var(--font-sans); }
 .mono { font-family: var(--font-mono); letter-spacing: .02em; }
 .kicker { font-family: var(--font-mono); color: var(--neon); letter-spacing: .12em;
           text-transform: uppercase; font-size: 1rem; }
+
+.cover { justify-content: center; align-items: flex-start; }
+.cover-body { position: relative; z-index: 1; }
+.wordmark { letter-spacing: -.02em; }
+.wordmark span { color: var(--neon); }
+.tagline { font-size: clamp(1.3rem, 2.6vmin, 2rem); color: var(--text-dim); margin-top: 1.5vmin; }
+.cover .kicker { margin-bottom: 2vmin; }
+.cover-foot {
+  position: absolute; bottom: var(--slide-pad); left: var(--slide-pad);
+  right: var(--slide-pad); display: flex; justify-content: space-between;
+  color: var(--text-dim); font-size: 1rem;
+}
+/* subtle neon grid backdrop */
+.cover-grid {
+  position: absolute; inset: 0; opacity: .12;
+  background-image:
+    linear-gradient(var(--surface) 1px, transparent 1px),
+    linear-gradient(90deg, var(--surface) 1px, transparent 1px);
+  background-size: 4vmin 4vmin;
+  mask-image: radial-gradient(circle at 30% 50%, #000 0%, transparent 70%);
+}
