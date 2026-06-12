@@ -24,10 +24,27 @@ function render() {
   progress.textContent = `${state.current + 1} / ${slides.length}`;
 }
 
+function runCounters(slideEl) {
+  slideEl.querySelectorAll('.count').forEach((el) => {
+    const to = parseInt(el.dataset.to, 10);
+    const dur = 900;
+    const start = performance.now();
+    el.textContent = '0';
+    function tick(now) {
+      const t = Math.min(1, (now - start) / dur);
+      const eased = 1 - Math.pow(1 - t, 3); // easeOutCubic
+      el.textContent = Math.round(to * eased);
+      if (t < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  });
+}
+
 function goTo(i) {
   if (i < 0 || i >= slides.length) return;
   state.current = i;
   render();
+  runCounters(slides[i]);
   if (i === 4) hooks.onEnterSlide5();
 }
 

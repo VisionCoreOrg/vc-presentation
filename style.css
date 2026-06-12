@@ -45,6 +45,13 @@ body { font-family: var(--font-sans); }
 .kicker { font-family: var(--font-mono); color: var(--neon); letter-spacing: .12em;
           text-transform: uppercase; font-size: 1rem; }
 
+.problem-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 8vmin; align-items: center; }
+.hl { color: var(--accent); }
+.problem-stats { display: flex; flex-direction: column; gap: 5vmin; }
+.stat-num { font-family: var(--font-mono); font-weight: 700; font-size: clamp(3rem, 9vmin, 7rem);
+            color: var(--neon); line-height: 1; }
+.stat p { color: var(--text-dim); margin-top: 1vmin; }
+
 .cover { justify-content: center; align-items: flex-start; }
 .cover-body { position: relative; z-index: 1; }
 .wordmark { letter-spacing: -.02em; }
