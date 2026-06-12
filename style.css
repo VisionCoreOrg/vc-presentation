@@ -2,14 +2,15 @@
 
 /* ─── Design Tokens ─────────────────────────────────────── */
 :root {
-  --bg:       #090f1c;
-  --bg2:      #0d1628;
-  --card:     #121d30;
-  --card2:    #162240;
-  --border:   #1e2d45;
-  --border2:  #253550;
-  --cyan:     #06b6d4;
-  --emerald:  #10b981;
+  --bg:       #1D2938;
+  --bg2:      #182230;
+  --card:     #1a2536;
+  --card2:    #1f2d42;
+  --border:   #243548;
+  --border2:  #2c3f58;
+  --accent:   #07EF5C;
+  --cyan:     #2A616E;
+  --emerald:  #13B37E;
   --rose:     #f43f5e;
   --amber:    #f59e0b;
   --text:     #f1f5f9;
@@ -38,7 +39,7 @@ body {
 }
 #progress-bar {
   height: 100%;
-  background: linear-gradient(90deg, var(--cyan), var(--emerald));
+  background: linear-gradient(90deg, var(--accent), var(--emerald));
   transition: width 0.45s var(--ease-out);
   box-shadow: 0 0 8px var(--cyan);
 }
@@ -146,7 +147,7 @@ body {
 }
 .cover-title em {
   font-style: normal;
-  background: linear-gradient(135deg, var(--cyan) 0%, var(--emerald) 100%);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--emerald) 100%);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   background-clip: text;
   margin-bottom: 22px;
@@ -572,7 +573,7 @@ body {
 }
 .cta-btn {
   display: inline-flex; align-items: center; gap: 12px;
-  background: linear-gradient(135deg, var(--cyan), var(--emerald));
+  background: linear-gradient(135deg, var(--accent), var(--emerald));
   color: #090f1c; font-weight: 600; font-size: 14px;
   padding: 14px 32px; border-radius: 14px;
   text-decoration: none;
