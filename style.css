@@ -148,3 +148,8 @@ body { font-family: var(--font-sans); }
 }
 .demo-btn:hover { transform: scale(1.04); }
 .demo-hint { color: var(--text-dim); font-size: 1rem; }
+
+.roadmap h1 { max-width: 26ch; margin-top: 1.5vmin; }
+.roadmap-card { display: flex; flex-direction: column; gap: 1.2vmin; }
+.rm-tag { color: var(--accent); font-size: .85rem; letter-spacing: .1em; text-transform: uppercase; }
+.roadmap-card h2 { margin-bottom: .5vmin; }
