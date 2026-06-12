@@ -155,13 +155,18 @@ render();
     // travel to destination
     particle.style.transition = 'left .7s ease, top .7s ease';
     particle.style.left = b.x + 'px'; particle.style.top = b.y + 'px';
+    let settled = false;
     const done = () => {
+      if (settled) return;            // idempotent: transitionend fires per-property, plus the fallback timer
+      settled = true;
+      clearTimeout(fallback);
       particle.removeEventListener('transitionend', done);
       $(NODE_EL[to]).classList.add('lit');
       busy = false;
       onArrive && onArrive();
     };
     particle.addEventListener('transitionend', done);
+    const fallback = setTimeout(done, 850); // guarantees arrival even if no transition occurs
   }
 
   function advance() {
