@@ -31,11 +31,29 @@ function goTo(n) {
 }
 
 window.addEventListener('keydown', e => {
-  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); goTo(current + 1); }
-  if (e.key === 'ArrowLeft')  { e.preventDefault(); goTo(current - 1); }
-  // Hidden presenter shortcuts
-  if (e.key.toLowerCase() === 's') triggerSim(isFailover);
-  if (e.key.toLowerCase() === 'f') toggleFailover();
+  // Step navigation — Enter or ↓, only on slide 2 (index 2 = Pipeline)
+  if ((e.key === 'Enter' || e.key === 'ArrowDown') && current === 2) {
+    e.preventDefault();
+    nextStep();
+    return;
+  }
+  // Reset animation — Escape on slide 2
+  if (e.key === 'Escape' && current === 2) {
+    e.preventDefault();
+    resetAnimation();
+    return;
+  }
+  // Slide navigation — Space or →
+  if (e.key === 'ArrowRight' || e.key === ' ') {
+    e.preventDefault();
+    // Block mid-animation on slide 2 (index 2)
+    if (current === 2 && stepIndex > 0 && stepIndex < STEPS.length) return;
+    goTo(current + 1);
+  }
+  if (e.key === 'ArrowLeft') {
+    e.preventDefault();
+    goTo(current - 1);
+  }
 });
 
 /* ═══════════════════════════════════════════════════════════
@@ -73,234 +91,7 @@ function triggerTerminal() {
   });
 }
 
-/* ═══════════════════════════════════════════════════════════
-   PIPELINE SIMULATOR (Slide 2)
-══════════════════════════════════════════════════════════════ */
-let isFailover = false;
-let simRunning = false;
-
-// Node/edge id maps
-const nodeIds = ['camera','minio','redis','worker','api','frontend'];
-const edgeIds = ['cam-minio','cam-redis','redis-worker','worker-minio','worker-api','api-frontend'];
-
-function getEdgeEl(id)  { return document.getElementById(`e-${id}`); }
-function getNodeBg(id)  { return document.getElementById(`nb-${id}`); }
-const particle = document.getElementById('particle');
-
-function resetDiagram() {
-  nodeIds.forEach(id => {
-    const bg = getNodeBg(id);
-    if (!bg) return;
-    bg.classList.remove('active-node','active-node-rose');
-    if (id === 'minio') {
-      bg.classList.toggle('minio-offline', isFailover);
-    }
-  });
-  edgeIds.forEach(id => {
-    const e = getEdgeEl(id);
-    if (e) e.classList.remove('active-edge','active-edge-rose');
-  });
-  particle.setAttribute('opacity', 0);
-}
-
-function toggleFailover() {
-  isFailover = !isFailover;
-  const badge = document.getElementById('minio-badge');
-  const btn   = document.getElementById('btn-fail');
-  badge.className = isFailover ? 'offline' : 'online';
-  badge.textContent = isFailover ? 'MinIO OFFLINE' : 'MinIO ONLINE';
-  const dot = btn.querySelector('.sim-btn-dot');
-  dot.className = `sim-btn-dot ${isFailover ? 'rose pulsing' : 'rose'}`;
-  resetDiagram();
-}
-
-/* Animate particle along an SVG path */
-function moveParticleOnPath(pathId, durationMs, color, onDone) {
-  const path = document.getElementById(pathId);
-  if (!path) { onDone?.(); return; }
-  const len = path.getTotalLength();
-  particle.setAttribute('fill', color);
-  particle.setAttribute('opacity', 1);
-  particle.style.filter = `drop-shadow(0 0 6px ${color})`;
-  const start = performance.now();
-  function frame(now) {
-    const t = Math.min((now - start) / durationMs, 1);
-    const ease = t < 0.5 ? 2*t*t : -1+(4-2*t)*t; // ease in-out
-    const pt = path.getPointAtLength(ease * len);
-    particle.setAttribute('cx', pt.x);
-    particle.setAttribute('cy', pt.y);
-    if (t < 1) requestAnimationFrame(frame);
-    else { particle.setAttribute('opacity', 0); onDone?.(); }
-  }
-  requestAnimationFrame(frame);
-}
-
-/* Activate a node visually */
-function activateNode(id, isRose) {
-  const bg = getNodeBg(id);
-  if (!bg) return;
-  bg.classList.remove('active-node','active-node-rose');
-  bg.classList.add(isRose ? 'active-node-rose' : 'active-node');
-}
-/* Activate an edge */
-function activateEdge(id, isRose) {
-  const e = getEdgeEl(id);
-  if (!e) return;
-  e.classList.remove('active-edge','active-edge-rose');
-  e.classList.add(isRose ? 'active-edge-rose' : 'active-edge');
-}
-
-/* The full simulation sequence */
-function triggerSim(failover) {
-  if (simRunning) return;
-  if (failover !== isFailover) {
-    isFailover = failover;
-    toggleFailover();
-  }
-  simRunning = true;
-  resetDiagram();
-
-  const color = isFailover ? '#f43f5e' : '#06b6d4';
-  const rose  = isFailover;
-
-  // Phase 1: Animate the car
-  animateCar(() => {
-    // Camera flash
-    activateNode('camera', false);
-    document.getElementById('cam-cone').classList.add('flash');
-
-    // Show detection badge
-    const badge = document.getElementById('detect-badge');
-    badge.className = 'ok show';
-    badge.textContent = 'PLACA DETECTADA · BRA·3E99';
-
-    setTimeout(() => {
-      document.getElementById('cam-cone').classList.remove('flash');
-
-      // Phase 2: Camera → MinIO or skip
-      if (!isFailover) {
-        activateEdge('cam-minio', false);
-        moveParticleOnPath('e-cam-minio', 700, color, () => {
-          activateNode('minio', false);
-          // Then camera → redis
-          setTimeout(() => {
-            activateEdge('cam-redis', false);
-            moveParticleOnPath('e-cam-redis', 700, color, () => {
-              activateNode('redis', false);
-              continueWorker(color, rose);
-            });
-          }, 300);
-        });
-      } else {
-        // Failover: skip minio, go straight to redis
-        activateEdge('cam-redis', true);
-        moveParticleOnPath('e-cam-redis', 700, color, () => {
-          activateNode('redis', true);
-          continueWorker(color, rose);
-        });
-      }
-    }, 600);
-  });
-}
-
-function continueWorker(color, rose) {
-  // Redis → Worker
-  setTimeout(() => {
-    activateEdge('redis-worker', rose);
-    moveParticleOnPath('e-redis-worker', 800, color, () => {
-      activateNode('worker', rose);
-
-      // Worker → MinIO (GET frame) if not failover
-      if (!isFailover) {
-        setTimeout(() => {
-          activateEdge('worker-minio', false);
-          moveParticleOnPath('e-worker-minio', 700, '#06b6d4', () => {
-            // Worker → API
-            setTimeout(() => {
-              activateEdge('worker-api', rose);
-              moveParticleOnPath('e-worker-api', 700, color, () => {
-                activateNode('api', rose);
-                // API → Frontend
-                setTimeout(() => {
-                  activateEdge('api-frontend', false);
-                  moveParticleOnPath('e-api-frontend', 600, '#06b6d4', () => {
-                    activateNode('frontend', false);
-                    finishSim(true); // success → gate opens
-                  });
-                }, 200);
-              });
-            }, 300);
-          });
-        }, 300);
-      } else {
-        // Failover: skip minio GET, go worker → api
-        setTimeout(() => {
-          activateEdge('worker-api', true);
-          moveParticleOnPath('e-worker-api', 700, color, () => {
-            activateNode('api', true);
-            setTimeout(() => {
-              activateEdge('api-frontend', false);
-              moveParticleOnPath('e-api-frontend', 600, '#06b6d4', () => {
-                activateNode('frontend', false);
-                finishSim(false); // failover → gate stays closed
-              });
-            }, 200);
-          });
-        }, 300);
-      }
-    });
-  }, 300);
-}
-
-function finishSim(gateOpens) {
-  const badge = document.getElementById('detect-badge');
-  const gate  = document.getElementById('gate-bar');
-  const car   = document.getElementById('sim-car');
-
-  if (gateOpens) {
-    gate.classList.add('open');
-    badge.className = 'ok show';
-    badge.textContent = 'ACESSO LIBERADO ✓';
-    // Car continues through gate to the RIGHT
-    setTimeout(() => {
-      car.style.transition = 'transform 1.4s ease-in';
-      car.style.transform  = 'translateX(calc(100vw + 200px))';
-      setTimeout(() => {
-        gate.classList.remove('open');
-        badge.className = 'ok';
-        car.style.transition = 'none';
-        car.style.transform  = 'translateX(-400px)'; // reset off-screen left
-        simRunning = false;
-      }, 1500);
-    }, 600);
-  } else {
-    badge.className = 'fail show';
-    badge.textContent = 'FALHA DE MÍDIA — DADOS SALVOS ✓';
-    setTimeout(() => {
-      badge.className = 'fail';
-      // Car reverses back LEFT
-      car.style.transition = 'transform 1s ease-in-out';
-      car.style.transform  = 'translateX(-400px)';
-      setTimeout(() => {
-        car.style.transition = 'none';
-        simRunning = false;
-      }, 1100);
-    }, 2000);
-  }
-}
-
-/* ─── Car animation ───────────────────────────────────── */
-function animateCar(onStop) {
-  const car = document.getElementById('sim-car');
-  // Car enters from LEFT toward gate (left→right, matching pipeline flow)
-  car.style.transition = 'transform 1.8s cubic-bezier(0.25, 1, 0.5, 1)';
-  car.style.transform  = 'translateX(120px)'; // stop just before gate at left:240px
-  setTimeout(onStop, 1900);
-}
-
 /* Expose for button clicks */
-window.triggerSim    = triggerSim;
-window.toggleFailover = toggleFailover;
 window.triggerTerminal = triggerTerminal;
 window.goTo = goTo;
 
@@ -313,3 +104,185 @@ window.addEventListener('touchend', e => {
   const dx = e.changedTouches[0].clientX - touchStartX;
   if (Math.abs(dx) > 50) goTo(current + (dx < 0 ? 1 : -1));
 });
+
+/* ═══════════════════════════════════════════════════════════
+   PIPELINE STEP-BY-STEP (Slide 2)
+══════════════════════════════════════════════════════════════ */
+
+/* ─── Declarative step list ─────────────────────────────── */
+const STEPS = [
+  { phase: 'external',   action: 'car-arrives'  },
+  { phase: 'external',   action: 'camera-flash' },
+  { phase: 'pipeline',   action: 'node', edge: 'cam-minio',    node: 'minio'    },
+  { phase: 'pipeline',   action: 'node', edge: 'cam-redis',    node: 'redis'    },
+  { phase: 'pipeline',   action: 'node', edge: 'redis-worker', node: 'worker'   },
+  { phase: 'pipeline',   action: 'node', edge: 'worker-api',   node: 'api'      },
+  { phase: 'pipeline',   action: 'node', edge: 'api-frontend', node: 'frontend' },
+  { phase: 'conclusion', action: 'gate-opens'   },
+];
+
+/* ─── State ─────────────────────────────────────────────── */
+let stepIndex    = 0;
+let currentPhase = 'idle';
+let animLocked   = false;
+const CROSSFADE_MS = 400;
+
+/* ─── Helpers ───────────────────────────────────────────── */
+function getEdgeEl(id) { return document.getElementById(`e-${id}`); }
+function getNodeBg(id)  { return document.getElementById(`nb-${id}`); }
+const particle = document.getElementById('particle');
+
+function setPhase(phase) {
+  document.getElementById('slide-pipeline').dataset.phase = phase;
+  currentPhase = phase;
+}
+
+function activateNode(id) {
+  const bg = getNodeBg(id);
+  if (bg) bg.classList.add('active-node');
+}
+
+function activateEdge(id) {
+  const e = getEdgeEl(id);
+  if (e) e.classList.add('active-edge');
+}
+
+/* ─── Particle animation ────────────────────────────────── */
+function moveParticleOnPath(pathId, durationMs, color, onDone) {
+  const path = document.getElementById(pathId);
+  if (!path) { onDone?.(); return; }
+  const len = path.getTotalLength();
+  particle.setAttribute('fill', color);
+  particle.setAttribute('opacity', 1);
+  particle.style.filter = `drop-shadow(0 0 6px ${color})`;
+  const start = performance.now();
+  function frame(now) {
+    const t = Math.min((now - start) / durationMs, 1);
+    const ease = t < 0.5 ? 2*t*t : -1+(4-2*t)*t;
+    const pt = path.getPointAtLength(ease * len);
+    particle.setAttribute('cx', pt.x);
+    particle.setAttribute('cy', pt.y);
+    if (t < 1) requestAnimationFrame(frame);
+    else { particle.setAttribute('opacity', 0); onDone?.(); }
+  }
+  requestAnimationFrame(frame);
+}
+
+/* ─── State machine ─────────────────────────────────────── */
+function nextStep() {
+  if (animLocked || stepIndex >= STEPS.length) return;
+  animLocked = true;
+
+  const step = STEPS[stepIndex];
+  const phaseChanged = step.phase !== currentPhase;
+
+  const run = () => {
+    executeStep(step);
+    updateStepIndicator(stepIndex);
+    stepIndex++;
+    animLocked = false;
+  };
+
+  if (phaseChanged) {
+    setPhase(step.phase);
+    setTimeout(run, CROSSFADE_MS);
+  } else {
+    run();
+  }
+}
+
+function executeStep(step) {
+  switch (step.action) {
+    case 'car-arrives':   executeCarArrives();            break;
+    case 'camera-flash':  executeCameraFlash();           break;
+    case 'node':          executeNode(step.edge, step.node); break;
+    case 'gate-opens':    executeGateOpens();             break;
+  }
+}
+
+/* ─── Step actions ──────────────────────────────────────── */
+function executeCarArrives() {
+  const car = document.getElementById('sim-car');
+  car.style.transition = 'transform 1.8s cubic-bezier(0.25, 1, 0.5, 1)';
+  car.style.transform  = 'translateX(170px)';
+}
+
+function executeCameraFlash() {
+  activateNode('camera');
+  const cone = document.getElementById('cam-cone');
+  cone.classList.add('flash');
+  const badge = document.getElementById('detect-badge');
+  badge.className = 'ok show';
+  badge.textContent = 'PLACA DETECTADA · BRA·3E99';
+  setTimeout(() => cone.classList.remove('flash'), 800);
+}
+
+function executeNode(edgeId, nodeId) {
+  activateEdge(edgeId);
+  moveParticleOnPath(`e-${edgeId}`, 700, '#07EF5C', () => activateNode(nodeId));
+}
+
+function executeGateOpens() {
+  const gate  = document.getElementById('gate-bar');
+  const badge = document.getElementById('detect-badge');
+  const car   = document.getElementById('sim-car');
+
+  gate.classList.add('open');
+  badge.className   = 'ok show';
+  badge.textContent = 'ACESSO LIBERADO ✓';
+
+  setTimeout(() => {
+    car.style.transition = 'transform 1.4s ease-in';
+    car.style.transform  = 'translateX(calc(100vw + 300px))';
+  }, 600);
+}
+
+/* ─── Step indicator ────────────────────────────────────── */
+function updateStepIndicator(completedIndex) {
+  document.querySelectorAll('.step-dot').forEach((dot, i) => {
+    dot.classList.remove('active', 'done');
+    if (i < completedIndex)      dot.classList.add('done');
+    else if (i === completedIndex) dot.classList.add('active');
+  });
+
+  const label = document.getElementById('step-label');
+  if (completedIndex < 0) {
+    label.textContent = 'pressione ↓ ou Enter para iniciar';
+  } else if (completedIndex >= STEPS.length - 1) {
+    label.textContent = 'concluído — pressione → para continuar';
+  } else {
+    label.textContent = `passo ${completedIndex + 1} de ${STEPS.length}`;
+  }
+}
+
+/* ─── Reset (Escape) ────────────────────────────────────── */
+function resetAnimation() {
+  stepIndex    = 0;
+  animLocked   = false;
+  setPhase('idle');
+
+  // Reset SVG nodes and edges
+  ['camera','minio','redis','worker','api','frontend'].forEach(id => {
+    const bg = getNodeBg(id);
+    if (bg) bg.classList.remove('active-node');
+  });
+  ['cam-minio','cam-redis','redis-worker','worker-minio','worker-api','api-frontend'].forEach(id => {
+    const e = getEdgeEl(id);
+    if (e) e.classList.remove('active-edge');
+  });
+  particle.setAttribute('opacity', 0);
+
+  // Reset car
+  const car = document.getElementById('sim-car');
+  car.style.transition = 'none';
+  car.style.transform  = 'translateX(-600px)';
+
+  // Reset gate and badge
+  document.getElementById('gate-bar').classList.remove('open');
+  document.getElementById('cam-cone').classList.remove('flash');
+  const badge = document.getElementById('detect-badge');
+  badge.className   = '';
+  badge.textContent = 'PLACA DETECTADA · BRA·3E99';
+
+  updateStepIndicator(-1);
+}
