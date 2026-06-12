@@ -106,7 +106,30 @@ render();
 
   const $ = (id) => document.getElementById(id);
 
-  function reset() { /* filled in Task 7d */ }
+  function setPhase(name) {
+    ['phase-scene','phase-diagram'].forEach((id) => {
+      const el = $(id);
+      if (id === 'phase-diagram') el.classList.toggle('active', name === 'diagram');
+      else el.classList.toggle('active', name !== 'diagram'); // scene shows for scene+conclusao
+    });
+  }
+
+  function clearNodes() {
+    Object.values(NODE_EL).forEach((id) => $(id).classList.remove('lit'));
+  }
+
+  function reset() {
+    idx = -1; busy = false;
+    setPhase('scene');
+    clearNodes();
+    $('particle').style.opacity = '0';
+    $('side-panel').classList.remove('show');
+    $('car').style.left = '-12%';
+    $('camera').querySelector('.cone').style.opacity = '0';
+    $('scene-badge').style.opacity = '0';
+    $('gate').style.transform = 'rotate(0deg)';
+    window.VC.state.pipelineComplete = false;
+  }
   function advance() { /* filled in Task 7d */ }
 
   // Wire into the global hooks (replaces the no-ops from Task 1)
