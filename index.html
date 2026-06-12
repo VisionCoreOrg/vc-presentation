@@ -70,7 +70,35 @@
         <div class="svc"><span class="svc-tag mono">api + ui</span><b>vc-api-core</b></div>
       </div>
     </section>
-    <section class="slide" id="s5" data-label="03 · PIPELINE"></section>
+    <section class="slide pipeline" id="s5" data-label="03 · PIPELINE">
+      <!-- Phase: external scene -->
+      <div class="phase scene active" id="phase-scene">
+        <div class="road">
+          <div class="car" id="car">🚗</div>
+          <div class="camera" id="camera"><div class="cone"></div>📷</div>
+          <div class="gate" id="gate"></div>
+          <div class="badge" id="scene-badge"></div>
+        </div>
+      </div>
+
+      <!-- Phase: pipeline diagram -->
+      <div class="phase diagram" id="phase-diagram">
+        <div class="stage" id="stage">
+          <div class="node" id="n-cam"       data-name="Camera-mock"     style="left:6%;  top:42%;">📷<span>camera-mock</span></div>
+          <div class="node" id="n-minio"     data-name="MinIO"          style="left:32%; top:14%;">🗄️<span>MinIO</span></div>
+          <div class="node" id="n-redis"     data-name="Redis"          style="left:32%; top:68%;">📨<span>Redis</span></div>
+          <div class="node" id="n-worker"    data-name="Worker-portaria" style="left:58%; top:42%;">🧠<span>worker-portaria</span></div>
+          <div class="node" id="n-api"       data-name="API-core"       style="left:80%; top:20%;">⚙️<span>api-core</span></div>
+          <div class="node" id="n-dashboard" data-name="Dashboard"      style="left:80%; top:64%;">🖥️<span>Dashboard</span></div>
+          <div class="particle" id="particle"></div>
+        </div>
+        <aside class="side-panel" id="side-panel">
+          <div class="sp-op mono" id="sp-op"></div>
+          <div class="sp-name" id="sp-name"></div>
+          <div class="sp-desc" id="sp-desc"></div>
+        </aside>
+      </div>
+    </section>
     <section class="slide" id="s6" data-label="04 · DEMO AO VIVO"></section>
     <section class="slide" id="s7" data-label="05 · PRÓXIMOS PASSOS"></section>
     <section class="slide cover" id="s8" data-label="VISIONCORE">
