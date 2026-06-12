@@ -89,6 +89,7 @@ render();
   ];
 
   const PANELS = {
+    cam:       { name: 'Camera-mock',      desc: 'Captura o frame e dispara o evento.' },
     minio:     { name: 'MinIO',            desc: 'Guarda a imagem (object storage).' },
     redis:     { name: 'Redis',            desc: 'Fila de eventos entre os serviços.' },
     worker:    { name: 'Worker-portaria',  desc: 'Detecta a placa com IA e lê o texto.' },
@@ -103,6 +104,7 @@ render();
 
   let idx = -1;       // -1 = not started; 0..STEPS.length-1 = step done
   let busy = false;   // true while a particle/transition is mid-flight
+  let flightId = 0;   // generation token; bumped on each flight and on reset to invalidate stale callbacks
 
   const $ = (id) => document.getElementById(id);
 
@@ -119,6 +121,7 @@ render();
   }
 
   function reset() {
+    flightId++;
     idx = -1; busy = false;
     setPhase('scene');
     clearNodes();
@@ -148,6 +151,7 @@ render();
     const a = centerOf(from), b = centerOf(to);
     const particle = $('particle');
     busy = true;
+    const myFlight = ++flightId;
     // place at source instantly
     particle.style.transition = 'none';
     particle.style.left = a.x + 'px'; particle.style.top = a.y + 'px'; particle.style.opacity = '1';
@@ -157,7 +161,7 @@ render();
     particle.style.left = b.x + 'px'; particle.style.top = b.y + 'px';
     let settled = false;
     const done = () => {
-      if (settled) return;            // idempotent: transitionend fires per-property, plus the fallback timer
+      if (settled || myFlight !== flightId) return;   // idempotent + invalidated-by-reset guard
       settled = true;
       clearTimeout(fallback);
       particle.removeEventListener('transitionend', done);
@@ -185,7 +189,10 @@ render();
       }
     } else if (step.phase === 'diagram') {
       setPhase('diagram');
-      if (idx > 0 && STEPS[idx-1].phase !== 'diagram') clearNodes(); // entering diagram: clean slate
+      if (idx > 0 && STEPS[idx-1].phase !== 'diagram') {
+        clearNodes();
+        showPanel(step.from, '');   // on diagram entry, show the source (camera-mock) panel
+      }
       $(NODE_EL[step.from]).classList.add('lit');
       moveParticle(step.from, step.to, () => {
         $(NODE_EL[step.from]).classList.remove('lit'); // origin dims; destination stays lit
