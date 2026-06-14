@@ -1,169 +1,308 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <title>VisionCore — Apresentação</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <main id="deck">
-    <section class="slide cover" id="s1" data-label="00 · VISIONCORE">
-      <div class="cover-grid" aria-hidden="true"></div>
-      <div class="cover-body">
-        <p class="kicker">License Plate Recognition</p>
-        <h1 class="wordmark">Vision<span>Core</span></h1>
-        <p class="tagline">Estacionamentos inteligentes com visão computacional</p>
-      </div>
-      <footer class="cover-foot">
-        <span>Engenharia de Software · TCC 2026.1</span>
-        <span class="mono">VisionCore LPR</span>
-      </footer>
-    </section>
-    <section class="slide problem" id="s2" data-label="01 · O PROBLEMA">
-      <div class="problem-grid">
-        <div class="problem-text">
-          <p class="kicker">O Problema</p>
-          <h1>Pátios privados ainda operam de forma <span class="hl">reativa</span>.</h1>
-          <p>Filas nas catracas, fricção na portaria e ausência de dados históricos
-             estruturados para auditoria de incidentes.</p>
+  <head>
+    <meta charset="UTF-8" />
+    <title>VisionCore — Apresentação</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main id="deck">
+      <section class="slide cover" id="s1" data-label="00 · VISIONCORE">
+        <div class="cover-grid" aria-hidden="true"></div>
+        <div class="cover-body">
+          <p class="kicker">License Plate Recognition</p>
+          <h1 class="wordmark">Vision<span>Core</span></h1>
+          <p class="tagline">
+            Estacionamentos inteligentes com visão computacional
+          </p>
         </div>
-        <div class="problem-stats">
-          <div class="stat">
-            <div class="stat-num"><span class="count" data-to="60">0</span>%</div>
-            <p>dos motoristas enfrentam filas e lentidão na portaria</p>
+        <footer class="cover-foot">
+          <span>Engenharia de Software · TCC 2026.1</span>
+          <span class="mono">VisionCore LPR</span>
+        </footer>
+      </section>
+      <section class="slide problem" id="s2" data-label="01 · O PROBLEMA">
+        <div class="problem-grid">
+          <div class="problem-text">
+            <p class="kicker">O Problema</p>
+            <h1>
+              Pátios privados ainda operam de forma
+              <span class="hl">reativa</span>.
+            </h1>
+            <p>
+              Filas nas catracas, fricção na portaria e ausência de dados
+              históricos estruturados para auditoria de incidentes.
+            </p>
           </div>
-          <div class="stat">
-            <div class="stat-num">~<span class="count" data-to="100">0</span>%</div>
-            <p>priorizam estabelecimentos com estacionamento inteligente</p>
+          <div class="problem-stats">
+            <div class="stat">
+              <div class="stat-num">
+                <span class="count" data-to="60">0</span>%
+              </div>
+              <p>dos motoristas enfrentam filas e lentidão na portaria</p>
+            </div>
+            <div class="stat">
+              <div class="stat-num">
+                ~<span class="count" data-to="100">0</span>%
+              </div>
+              <p>priorizam estabelecimentos com estacionamento inteligente</p>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
-    <section class="slide solution" id="s3" data-label="02 · A SOLUÇÃO">
-      <p class="kicker">A Solução</p>
-      <h1>VisionCore: LPR de baixo custo sobre a infraestrutura que já existe.</h1>
-      <div class="cards-3">
-        <div class="card">
-          <h2 class="mono">Baixo custo</h2>
-          <p>Reaproveita câmeras IP já instaladas no local, sem hardware dedicado.</p>
+      </section>
+      <section class="slide solution" id="s3" data-label="02 · A SOLUÇÃO">
+        <p class="kicker">A Solução</p>
+        <h1>
+          VisionCore: LPR de baixo custo sobre a infraestrutura que já existe.
+        </h1>
+        <div class="cards-3">
+          <div class="card">
+            <h2 class="mono">Baixo custo</h2>
+            <p>
+              Reaproveita câmeras IP já instaladas no local, sem hardware
+              dedicado.
+            </p>
+          </div>
+          <div class="card">
+            <h2 class="mono">Padrão de rede</h2>
+            <p>
+              Integra via protocolos padronizados (RTSP) — vídeo bruto vira
+              entrada do pipeline.
+            </p>
+          </div>
+          <div class="card">
+            <h2 class="mono">Dados estruturados</h2>
+            <p>
+              Transforma frames em transações: placa, horário e status de acesso
+              auditáveis.
+            </p>
+          </div>
         </div>
-        <div class="card">
-          <h2 class="mono">Padrão de rede</h2>
-          <p>Integra via protocolos padronizados (RTSP) — vídeo bruto vira entrada do pipeline.</p>
+      </section>
+      <section class="slide arch" id="s4" data-label="03 · ARQUITETURA">
+        <p class="kicker">Arquitetura</p>
+        <h1>Microsserviços containerizados, comunicação assíncrona.</h1>
+        <p class="arch-sub">
+          Cada serviço roda isolado em seu container Docker e conversa com os
+          demais por mensagens — não por chamadas diretas acopladas.
+        </p>
+        <div class="svc-row">
+          <div class="svc">
+            <span class="svc-tag mono">borda</span><b>vc-camera-mock</b>
+          </div>
+          <div class="svc">
+            <span class="svc-tag mono">storage</span><b>MinIO</b>
+          </div>
+          <div class="svc">
+            <span class="svc-tag mono">fila</span><b>Redis</b>
+          </div>
+          <div class="svc">
+            <span class="svc-tag mono">IA</span><b>vc-worker-portaria</b>
+          </div>
+          <div class="svc">
+            <span class="svc-tag mono">api + ui</span><b>vc-api-core</b>
+          </div>
         </div>
-        <div class="card">
-          <h2 class="mono">Dados estruturados</h2>
-          <p>Transforma frames em transações: placa, horário e status de acesso auditáveis.</p>
+      </section>
+      <section class="slide pipeline" id="s5" data-label="03 · PIPELINE">
+        <!-- Phase: external scene -->
+        <div class="phase scene active" id="phase-scene">
+          <div class="road">
+            <div class="car" id="car">
+              <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  fill="#e83333"
+                  d="M495.144,222.319h-23.666l-57.053-99.424H202.691l-79.664,99.424H25.062
+                c-15.469,0-27.236,13.815-24.722,29.086l15.072,91.822c0,0.726,0.594,1.388,1.322,1.388h64.387
+                c3.305-28.757,27.764-51.166,57.379-51.166s54.076,22.409,57.381,51.166H343.43
+                c3.305-28.757,27.766-51.166,57.381-51.166s54.074,22.409,57.381,51.166h36.953
+                c9.32,0,16.856-7.537,16.856-16.858v-88.583C512,229.855,504.465,222.319,495.144,222.319z
+                M327.894,162.559h57.906l35.898,59.76l1.254,3.709l0.268,0.984h-95.326V162.559z
+                M179.853,226.923l1.879-4.604l47.799-59.76h53.016v64.454h-74.61L179.853,226.923z"
+                />
+                <path
+                  fill="#e83333"
+                  d="M138.5,313.282c-18.707,0-34.242,13.552-37.348,31.334
+                c-0.398,2.114-0.598,4.362-0.598,6.611c0,20.889,16.99,37.878,37.945,37.878
+                s37.946-16.99,37.946-37.878c0-2.248-0.198-4.496-0.594-6.611
+                C172.744,326.833,157.209,313.282,138.5,313.282z"
+                />
+                <path
+                  fill="#e83333"
+                  d="M400.81,313.282c-18.709,0-34.244,13.552-37.35,31.334
+                c-0.398,2.114-0.596,4.362-0.596,6.611c0,20.889,16.988,37.878,37.945,37.878
+                s37.944-16.99,37.944-37.878c0-2.248-0.198-4.496-0.594-6.611
+                C435.053,326.833,419.518,313.282,400.81,313.282z"
+                />
+              </svg>
+            </div>
+            <div class="camera" id="camera">
+              <div class="cone"></div>
+              <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  fill="#eaf2f0"
+                  d="M395.928,187.794l-272.1-135.687c-5.358-2.669-11.866-0.494-14.538,4.864L51.24,173.379
+			            c-1.283,2.573-1.491,5.55-0.579,8.276c0.912,2.727,2.869,4.979,5.443,6.262l81.242,40.511l-7.208,14.455
+                  c-2.671,5.358-0.494,11.866,4.864,14.538l2.561,1.278l-13.998,24.929H41.027C33.351,268.782,17.867,258.626,0,258.626v92.338
+			            c17.454,0,32.642-9.688,40.49-23.978h95.766c7.838,0,15.065-4.229,18.903-11.063l21.255-37.85l3.695,1.842
+			            c5.357,2.671,11.867,0.493,14.539-4.863l7.208-14.455l60.7,30.271c3.501,1.746,7.671,1.471,10.911-0.723l16.753-11.332
+			            l29.912,14.916c1.518,0.758,3.174,1.14,4.837,1.14c1.159,0,2.32-0.188,3.439-0.562c2.727-0.91,4.979-2.869,6.262-5.441
+			            l30.624-61.413l31.757-20.903c3.239-2.132,5.092-5.832,4.86-9.702C401.679,192.976,399.397,189.525,395.928,187.794z"
+                />
+              </svg>
+            </div>
+            <div class="gate" id="gate"></div>
+            <div class="gate-post" aria-hidden="true"></div>
+            <div class="badge" id="scene-badge"></div>
+          </div>
         </div>
-      </div>
-    </section>
-    <section class="slide arch" id="s4" data-label="03 · ARQUITETURA">
-      <p class="kicker">Arquitetura</p>
-      <h1>Microsserviços containerizados, comunicação assíncrona.</h1>
-      <p class="arch-sub">Cada serviço roda isolado em seu container Docker e conversa
-         com os demais por mensagens — não por chamadas diretas acopladas.</p>
-      <div class="svc-row">
-        <div class="svc"><span class="svc-tag mono">borda</span><b>vc-camera-mock</b></div>
-        <div class="svc"><span class="svc-tag mono">storage</span><b>MinIO</b></div>
-        <div class="svc"><span class="svc-tag mono">fila</span><b>Redis</b></div>
-        <div class="svc"><span class="svc-tag mono">IA</span><b>vc-worker-portaria</b></div>
-        <div class="svc"><span class="svc-tag mono">api + ui</span><b>vc-api-core</b></div>
-      </div>
-    </section>
-    <section class="slide pipeline" id="s5" data-label="03 · PIPELINE">
-      <!-- Phase: external scene -->
-      <div class="phase scene active" id="phase-scene">
-        <div class="road">
-          <div class="car" id="car">🚗</div>
-          <div class="camera" id="camera"><div class="cone"></div>📷</div>
-          <div class="gate" id="gate"></div>
-          <div class="gate-post" aria-hidden="true"></div>
-          <div class="badge" id="scene-badge"></div>
-        </div>
-      </div>
 
-      <!-- Phase: pipeline diagram -->
-      <div class="phase diagram" id="phase-diagram">
-        <div class="stage" id="stage">
-          <svg class="edges" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-            <line x1="11" y1="42" x2="32" y2="14"/>
-            <line x1="11" y1="42" x2="32" y2="68"/>
-            <line x1="32" y1="68" x2="58" y2="42"/>
-            <line x1="58" y1="42" x2="32" y2="14"/>
-            <line x1="58" y1="42" x2="80" y2="20"/>
-            <line x1="80" y1="20" x2="80" y2="64"/>
-          </svg>
-          <div class="node" id="n-cam"       data-name="Camera-mock"     style="left:11%; top:42%;">📷<span>camera-mock</span></div>
-          <div class="node" id="n-minio"     data-name="MinIO"          style="left:32%; top:14%;">🗄️<span>MinIO</span></div>
-          <div class="node" id="n-redis"     data-name="Redis"          style="left:32%; top:68%;">📨<span>Redis</span></div>
-          <div class="node" id="n-worker"    data-name="Worker-portaria" style="left:58%; top:42%;">🧠<span>worker-portaria</span></div>
-          <div class="node" id="n-api"       data-name="API-core"       style="left:80%; top:20%;">⚙️<span>api-core</span></div>
-          <div class="node" id="n-dashboard" data-name="Dashboard"      style="left:80%; top:64%;">🖥️<span>Dashboard</span></div>
-          <div class="particle" id="particle"></div>
+        <!-- Phase: pipeline diagram -->
+        <div class="phase diagram" id="phase-diagram">
+          <div class="stage" id="stage">
+            <svg
+              class="edges"
+              viewBox="0 0 100 100"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              <line x1="11" y1="42" x2="32" y2="14" />
+              <line x1="11" y1="42" x2="32" y2="68" />
+              <line x1="32" y1="68" x2="58" y2="42" />
+              <line x1="58" y1="42" x2="32" y2="14" />
+              <line x1="58" y1="42" x2="80" y2="20" />
+              <line x1="80" y1="20" x2="80" y2="64" />
+            </svg>
+            <div
+              class="node"
+              id="n-cam"
+              data-name="Camera-mock"
+              style="left: 11%; top: 42%"
+            >
+              📷<span>camera-mock</span>
+            </div>
+            <div
+              class="node"
+              id="n-minio"
+              data-name="MinIO"
+              style="left: 32%; top: 14%"
+            >
+              🗄️<span>MinIO</span>
+            </div>
+            <div
+              class="node"
+              id="n-redis"
+              data-name="Redis"
+              style="left: 32%; top: 68%"
+            >
+              📨<span>Redis</span>
+            </div>
+            <div
+              class="node"
+              id="n-worker"
+              data-name="Worker-portaria"
+              style="left: 58%; top: 42%"
+            >
+              🧠<span>worker-portaria</span>
+            </div>
+            <div
+              class="node"
+              id="n-api"
+              data-name="API-core"
+              style="left: 80%; top: 20%"
+            >
+              ⚙️<span>api-core</span>
+            </div>
+            <div
+              class="node"
+              id="n-dashboard"
+              data-name="Dashboard"
+              style="left: 80%; top: 64%"
+            >
+              🖥️<span>Dashboard</span>
+            </div>
+            <div class="particle" id="particle"></div>
+            <div class="particle" id="particle-b"></div>
+          </div>
+          <aside class="side-panel" id="side-panel">
+            <div class="sp-op mono" id="sp-op"></div>
+            <div class="sp-name" id="sp-name"></div>
+            <div class="sp-desc" id="sp-desc"></div>
+          </aside>
         </div>
-        <aside class="side-panel" id="side-panel">
-          <div class="sp-op mono" id="sp-op"></div>
-          <div class="sp-name" id="sp-name"></div>
-          <div class="sp-desc" id="sp-desc"></div>
-        </aside>
-      </div>
-    </section>
-    <section class="slide demo" id="s6" data-label="04 · DEMO AO VIVO">
-      <div class="demo-grid">
-        <div class="demo-left">
-          <p class="kicker">Demonstração</p>
-          <h1>Do conceito ao sistema rodando.</h1>
-          <ul class="demo-list">
-            <li>OCR real lendo placas no pipeline ao vivo</li>
-            <li>Depurador visual: crop YOLO × imagem binarizada (OpenCV)</li>
-            <li>Acurácia: Levenshtein / CER contra o ground truth</li>
-          </ul>
+      </section>
+      <section class="slide demo" id="s6" data-label="04 · DEMO AO VIVO">
+        <div class="demo-grid">
+          <div class="demo-left">
+            <p class="kicker">Demonstração</p>
+            <h1>Do conceito ao sistema rodando.</h1>
+            <ul class="demo-list">
+              <li>OCR real lendo placas no pipeline ao vivo</li>
+              <li>Depurador visual: crop YOLO × imagem binarizada (OpenCV)</li>
+              <li>Acurácia: Levenshtein / CER contra o ground truth</li>
+            </ul>
+          </div>
+          <div class="demo-right">
+            <a
+              class="demo-btn"
+              href="http://localhost"
+              target="_blank"
+              rel="noopener"
+            >
+              Abrir ambiente real ↗
+            </a>
+            <p class="demo-hint mono">
+              http://localhost · nginx gateway (porta 80)
+            </p>
+          </div>
         </div>
-        <div class="demo-right">
-          <a class="demo-btn" href="http://localhost" target="_blank" rel="noopener">
-            Abrir ambiente real ↗
-          </a>
-          <p class="demo-hint mono">http://localhost · nginx gateway (porta 80)</p>
+      </section>
+      <section class="slide roadmap" id="s7" data-label="05 · PRÓXIMOS PASSOS">
+        <p class="kicker">Próximos passos</p>
+        <h1>Refinar o que já entrega — e expandir o escopo.</h1>
+        <div class="cards-3">
+          <div class="card roadmap-card">
+            <span class="rm-tag mono">algoritmos</span>
+            <h2 class="mono">Classificação pré-binarização</h2>
+            <p>
+              Classificar a imagem antes da binarização para escolher o
+              tratamento e elevar a assertividade do OCR.
+            </p>
+          </div>
+          <div class="card roadmap-card">
+            <span class="rm-tag mono">algoritmos</span>
+            <h2 class="mono">Pré-processamento</h2>
+            <p>
+              Refino dos filtros de OpenCV (CLAHE, Otsu) para placas em
+              condições adversas.
+            </p>
+          </div>
+          <div class="card roadmap-card">
+            <span class="rm-tag mono">novo serviço</span>
+            <h2 class="mono">vc-worker-pátio</h2>
+            <p>
+              Monitoramento espacial de vagas — detecção de ocupação por
+              polígonos (próximo semestre).
+            </p>
+          </div>
         </div>
-      </div>
-    </section>
-    <section class="slide roadmap" id="s7" data-label="05 · PRÓXIMOS PASSOS">
-      <p class="kicker">Próximos passos</p>
-      <h1>Refinar o que já entrega — e expandir o escopo.</h1>
-      <div class="cards-3">
-        <div class="card roadmap-card">
-          <span class="rm-tag mono">algoritmos</span>
-          <h2 class="mono">Classificação pré-binarização</h2>
-          <p>Classificar a imagem antes da binarização para escolher o tratamento e elevar a assertividade do OCR.</p>
+      </section>
+      <section class="slide cover" id="s8" data-label="VISIONCORE">
+        <div class="cover-grid" aria-hidden="true"></div>
+        <div class="cover-body">
+          <h1 class="wordmark">Vision<span>Core</span></h1>
+          <p class="tagline">Obrigado pela atenção.</p>
         </div>
-        <div class="card roadmap-card">
-          <span class="rm-tag mono">algoritmos</span>
-          <h2 class="mono">Pré-processamento</h2>
-          <p>Refino dos filtros de OpenCV (CLAHE, Otsu) para placas em condições adversas.</p>
-        </div>
-        <div class="card roadmap-card">
-          <span class="rm-tag mono">novo serviço</span>
-          <h2 class="mono">vc-worker-pátio</h2>
-          <p>Monitoramento espacial de vagas — detecção de ocupação por polígonos (próximo semestre).</p>
-        </div>
-      </div>
-    </section>
-    <section class="slide cover" id="s8" data-label="VISIONCORE">
-      <div class="cover-grid" aria-hidden="true"></div>
-      <div class="cover-body">
-        <h1 class="wordmark">Vision<span>Core</span></h1>
-        <p class="tagline">Obrigado pela atenção.</p>
-      </div>
-      <footer class="cover-foot">
-        <span>Engenharia de Software · TCC 2026.1</span>
-        <span class="mono">VisionCore LPR</span>
-      </footer>
-    </section>
-  </main>
+        <footer class="cover-foot">
+          <span>Engenharia de Software · TCC 2026.1</span>
+          <span class="mono">VisionCore LPR</span>
+        </footer>
+      </section>
+    </main>
 
-  <div id="section-label"></div>
-  <div id="progress"></div>
+    <div id="section-label"></div>
+    <div id="progress"></div>
 
-  <script src="app.js"></script>
-</body>
+    <script src="app.js"></script>
+  </body>
 </html>

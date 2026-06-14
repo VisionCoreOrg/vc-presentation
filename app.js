@@ -79,22 +79,28 @@ render();
   const STEPS = [
     { phase: 'scene',    action: 'carArrives' },
     { phase: 'scene',    action: 'cameraDetects' },
-    { phase: 'diagram',  from: 'cam',    to: 'minio',     op: 'S3 PUT',   panel: 'minio' },
-    { phase: 'diagram',  from: 'cam',    to: 'redis',     op: 'LPUSH',    panel: 'redis' },
-    { phase: 'diagram',  from: 'redis',  to: 'worker',    op: 'BLPOP',    panel: 'worker' },
-    { phase: 'diagram',  from: 'worker', to: 'minio',     op: 'S3 GET',   panel: 'minio' },
-    { phase: 'diagram',  from: 'worker', to: 'api',       op: 'HTTP POST',panel: 'api' },
-    { phase: 'diagram',  from: 'api',    to: 'dashboard', op: 'HTTP GET', panel: 'dashboard' },
-    { phase: 'conclusao',action: 'gateOpens' },
+    {
+      phase: 'diagram',
+      parallel: [
+        { from: 'cam', to: 'minio' },
+        { from: 'cam', to: 'redis' },
+      ],
+      op: 'S3 PUT · LPUSH', panel: 'cam',
+    },
+    { phase: 'diagram',  from: 'redis',     to: 'worker',    op: 'BLPOP',     panel: 'worker' },
+    { phase: 'diagram',  from: 'worker',    to: 'minio',     op: 'S3 GET',    panel: 'minio' },
+    { phase: 'diagram',  from: 'worker',    to: 'api',       op: 'HTTP POST', panel: 'api' },
+    { phase: 'diagram',  from: 'dashboard', to: 'api',       op: 'HTTP GET',  panel: 'dashboard' },
+    { phase: 'conclusao', action: 'gateOpens' },
   ];
 
   const PANELS = {
-    cam:       { name: 'Camera-mock',      desc: 'Captura o frame e dispara o evento.' },
+    cam:       { name: 'Camera-mock',      desc: 'Envia a imagem ao storage e publica o evento na fila simultaneamente.' },
     minio:     { name: 'MinIO',            desc: 'Guarda a imagem (object storage).' },
     redis:     { name: 'Redis',            desc: 'Fila de eventos entre os serviços.' },
     worker:    { name: 'Worker-portaria',  desc: 'Detecta a placa com IA e lê o texto.' },
     api:       { name: 'API-core',         desc: 'Registra a transação.' },
-    dashboard: { name: 'Dashboard',        desc: 'Operador vê em tempo real.' },
+    dashboard: { name: 'Dashboard',        desc: 'Consulta a API e exibe a transação em tempo real.' },
   };
 
   const NODE_EL = {
@@ -126,6 +132,7 @@ render();
     setPhase('scene');
     clearNodes();
     $('particle').style.opacity = '0';
+    $('particle-b').style.opacity = '0';
     $('side-panel').classList.remove('show');
     $('car').style.left = '-12%';
     $('camera').querySelector('.cone').style.opacity = '0';
@@ -147,36 +154,31 @@ render();
     return { x: r.left + r.width/2 - stage.left, y: r.top + r.height/2 - stage.top };
   }
 
-  function moveParticle(from, to, onArrive) {
+  function moveParticle(particleEl, from, to, onArrive) {
     const a = centerOf(from), b = centerOf(to);
-    const particle = $('particle');
-    busy = true;
-    const myFlight = ++flightId;
-    // place at source instantly
-    particle.style.transition = 'none';
-    particle.style.left = a.x + 'px'; particle.style.top = a.y + 'px'; particle.style.opacity = '1';
-    void particle.offsetWidth; // force reflow
-    // travel to destination
-    particle.style.transition = 'left .7s ease, top .7s ease';
-    particle.style.left = b.x + 'px'; particle.style.top = b.y + 'px';
+    const myFlight = flightId;
+    particleEl.style.transition = 'none';
+    particleEl.style.left = a.x + 'px'; particleEl.style.top = a.y + 'px'; particleEl.style.opacity = '1';
+    void particleEl.offsetWidth;
+    particleEl.style.transition = 'left .7s ease, top .7s ease';
+    particleEl.style.left = b.x + 'px'; particleEl.style.top = b.y + 'px';
     let settled = false;
     const done = () => {
-      if (settled || myFlight !== flightId) return;   // idempotent + invalidated-by-reset guard
+      if (settled || myFlight !== flightId) return;
       settled = true;
       clearTimeout(fallback);
-      particle.removeEventListener('transitionend', done);
-      particle.style.opacity = '0';               // absorbed by the destination node (its glow holds the data)
+      particleEl.removeEventListener('transitionend', done);
+      particleEl.style.opacity = '0';
       $(NODE_EL[to]).classList.add('lit');
-      busy = false;
       onArrive && onArrive();
     };
-    particle.addEventListener('transitionend', done);
-    const fallback = setTimeout(done, 850); // guarantees arrival even if no transition occurs
+    particleEl.addEventListener('transitionend', done);
+    const fallback = setTimeout(done, 850);
   }
 
   function advance() {
-    if (busy) return;                       // ignore input mid-flight
-    if (idx >= STEPS.length - 1) return;     // already finished
+    if (busy) return;
+    if (idx >= STEPS.length - 1) return;
     idx += 1;
     const step = STEPS[idx];
 
@@ -190,23 +192,42 @@ render();
       }
     } else if (step.phase === 'diagram') {
       setPhase('diagram');
-      if (idx > 0 && STEPS[idx-1].phase !== 'diagram') {
-        clearNodes();
-        showPanel(step.from, '');   // on diagram entry, show the source (camera-mock) panel
+      clearNodes(); // each step starts clean — only active nodes glow
+
+      if (step.parallel) {
+        const { parallel, op, panel } = step;
+        busy = true;
+        let pending = parallel.length;
+        $(NODE_EL[parallel[0].from]).classList.add('lit');
+        const particles = [$('particle'), $('particle-b')];
+        parallel.forEach((sub, i) => {
+          moveParticle(particles[i], sub.from, sub.to, () => {
+            if (--pending === 0) {
+              $(NODE_EL[parallel[0].from]).classList.remove('lit');
+              showPanel(panel, op);
+              busy = false;
+            }
+          });
+        });
+      } else {
+        const { from, to, op, panel } = step;
+        $(NODE_EL[from]).classList.add('lit');
+        busy = true;
+        moveParticle($('particle'), from, to, () => {
+          $(NODE_EL[from]).classList.remove('lit');
+          showPanel(panel, op);
+          busy = false;
+        });
       }
-      $(NODE_EL[step.from]).classList.add('lit');
-      moveParticle(step.from, step.to, () => {
-        $(NODE_EL[step.from]).classList.remove('lit'); // origin dims; destination stays lit
-        showPanel(step.panel, step.op);
-      });
     } else if (step.phase === 'conclusao') {
       setPhase('scene');
       $('particle').style.opacity = '0';
+      $('particle-b').style.opacity = '0';
       $('side-panel').classList.remove('show');
-      $('gate').style.transform = 'rotate(-72deg)';
+      $('gate').style.transform = 'rotate(-90deg)';
       const b = $('scene-badge'); b.textContent = 'ACESSO LIBERADO ✓'; b.style.opacity = '1';
       $('car').style.left = '100%';
-      window.VC.state.pipelineComplete = true; // releases forward deck nav
+      window.VC.state.pipelineComplete = true;
     }
   }
 
