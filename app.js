@@ -205,7 +205,7 @@ render();
       $('side-panel').classList.remove('show');
       $('gate').style.transform = 'rotate(-72deg)';
       const b = $('scene-badge'); b.textContent = 'ACESSO LIBERADO ✓'; b.style.opacity = '1';
-      $('car').style.left = '120%';
+      $('car').style.left = '100%';
       window.VC.state.pipelineComplete = true; // releases forward deck nav
     }
   }
