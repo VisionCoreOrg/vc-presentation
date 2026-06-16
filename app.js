@@ -79,6 +79,7 @@ render();
   const STEPS = [
     { phase: 'scene',    action: 'carArrives' },
     { phase: 'scene',    action: 'cameraDetects' },
+    { phase: 'bridge',   action: 'dataFlies' },
     {
       phase: 'diagram',
       parallel: [
@@ -133,6 +134,7 @@ render();
     clearNodes();
     $('particle').style.opacity = '0';
     $('particle-b').style.opacity = '0';
+    $('bridge-ball').style.opacity = '0';
     $('side-panel').classList.remove('show');
     $('car').style.left = '-12%';
     $('camera').querySelector('.cone').style.opacity = '0';
@@ -176,6 +178,51 @@ render();
     const fallback = setTimeout(done, 850);
   }
 
+  // A costura: a bolinha sai da câmera (cena) e voa num arco até a camera-mock
+  // (diagrama), permanecendo visível enquanto a cena some e o diagrama entra.
+  // Posições em coordenadas do slide (#s5), não do .stage — por isso ela
+  // sobrevive ao cross-fade. O #n-cam mede certo mesmo oculto (visibility:hidden
+  // preserva o layout).
+  function flyBridge() {
+    const sec = document.getElementById('s5').getBoundingClientRect();
+    const camR = $('camera').getBoundingClientRect();
+    const nodeR = $(NODE_EL.cam).getBoundingClientRect();
+    const start = { x: camR.left + camR.width / 2 - sec.left, y: camR.top + camR.height / 2 - sec.top };
+    const end   = { x: nodeR.left + nodeR.width / 2 - sec.left, y: nodeR.top + nodeR.height / 2 - sec.top };
+    // ponto de controle à direita e acima do início: tangente inicial sobe pra
+    // direita (o "pra direita" pedido) e o arco desce até a camera-mock.
+    const ctrl = { x: start.x + sec.width * 0.16, y: Math.min(start.y, end.y) - sec.height * 0.2 };
+
+    const bb = $('bridge-ball');
+    const myFlight = flightId;
+    const DUR = 1150;
+    const t0 = performance.now();
+    let crossfaded = false;
+
+    bb.style.left = start.x + 'px';
+    bb.style.top = start.y + 'px';
+    bb.style.opacity = '1';
+
+    function frame(now) {
+      if (myFlight !== flightId) return; // reset no meio do voo → aborta
+      const t = Math.min(1, (now - t0) / DUR);
+      const e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; // easeInOutCubic
+      const mt = 1 - e;
+      bb.style.left = (mt * mt * start.x + 2 * mt * e * ctrl.x + e * e * end.x) + 'px';
+      bb.style.top  = (mt * mt * start.y + 2 * mt * e * ctrl.y + e * e * end.y) + 'px';
+      // dispara o cross-fade cedo, com a bolinha ainda em voo
+      if (!crossfaded && t >= 0.18) { crossfaded = true; setPhase('diagram'); }
+      if (t < 1) {
+        requestAnimationFrame(frame);
+      } else {
+        bb.style.opacity = '0';
+        $(NODE_EL.cam).classList.add('lit'); // pousa e acende a camera-mock
+        busy = false;
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+
   function advance() {
     if (busy) return;
     if (idx >= STEPS.length - 1) return;
@@ -190,6 +237,11 @@ render();
         $('camera').querySelector('.cone').style.opacity = '1';
         const b = $('scene-badge'); b.textContent = 'PLACA DETECTADA'; b.style.opacity = '1';
       }
+    } else if (step.phase === 'bridge') {
+      // mantém a cena; flyBridge faz o cross-fade no meio do voo
+      clearNodes();
+      busy = true;
+      flyBridge();
     } else if (step.phase === 'diagram') {
       setPhase('diagram');
       clearNodes(); // each step starts clean — only active nodes glow

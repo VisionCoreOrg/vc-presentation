@@ -83,27 +83,46 @@
         <p class="kicker">Arquitetura</p>
         <h1>Microsserviços containerizados, comunicação assíncrona.</h1>
         <p class="arch-sub">
-          Cada serviço roda isolado em seu container Docker e conversa com os
-          demais por mensagens — não por chamadas diretas acopladas.
+          Cada serviço roda isolado em seu container e se comunica de forma
+          assíncrona. Tudo converge na <b>vc-api-core</b> — a fonte da verdade
+          (MySQL) e o ponto de controle do sistema.
         </p>
-        <div class="svc-row">
-          <div class="svc">
-            <span class="svc-tag mono">borda</span><b>vc-camera-mock</b>
+        <div class="arch-stage">
+          <svg
+            class="arch-edges"
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <line x1="50" y1="50" x2="50" y2="14" />
+            <line x1="50" y1="50" x2="83" y2="34" />
+            <line x1="50" y1="50" x2="79" y2="80" />
+            <line x1="50" y1="50" x2="21" y2="80" />
+            <line x1="50" y1="50" x2="17" y2="34" />
+          </svg>
+          <div class="anode hub" style="left: 50%; top: 50%">
+            ⚙️<span class="aname mono">vc-api-core</span
+            ><span class="atag mono">api · fonte da verdade</span>
           </div>
-          <div class="svc">
-            <span class="svc-tag mono">storage</span><b>MinIO</b>
+          <div class="anode" style="left: 50%; top: 14%">
+            🗄️<span class="aname mono">MinIO</span
+            ><span class="atag mono">storage</span>
           </div>
-          <div class="svc">
-            <span class="svc-tag mono">fila</span><b>Redis</b>
+          <div class="anode" style="left: 83%; top: 34%">
+            📨<span class="aname mono">Redis</span
+            ><span class="atag mono">fila</span>
           </div>
-          <div class="svc">
-            <span class="svc-tag mono">IA</span><b>vc-worker-portaria</b>
+          <div class="anode" style="left: 79%; top: 80%">
+            🖥️<span class="aname mono">vc-frontend</span
+            ><span class="atag mono">ui (debug)</span>
           </div>
-          <div class="svc">
-            <span class="svc-tag mono">api</span><b>vc-api-core</b>
+          <div class="anode" style="left: 21%; top: 80%">
+            🧠<span class="aname mono">vc-worker-portaria</span
+            ><span class="atag mono">ia · yolo + ocr</span>
           </div>
-          <div class="svc">
-            <span class="svc-tag mono">ui (debug mode)</span><b>vc-frontend</b>
+          <div class="anode" style="left: 17%; top: 34%">
+            📷<span class="aname mono">vc-camera-mock</span
+            ><span class="atag mono">borda</span>
           </div>
         </div>
       </section>
@@ -233,6 +252,10 @@
             <div class="sp-desc" id="sp-desc"></div>
           </aside>
         </div>
+
+        <!-- Bridge ball: lives at slide level (fora das fases) pra sobreviver ao
+             cross-fade cena→diagrama. Viaja da câmera até a camera-mock. -->
+        <div class="bridge-ball" id="bridge-ball" aria-hidden="true"></div>
       </section>
       <section class="slide demo" id="s6" data-label="04 · DEMO AO VIVO">
         <div class="demo-grid">
