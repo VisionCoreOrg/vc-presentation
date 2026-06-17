@@ -235,7 +235,7 @@ render();
         $('car').style.left = '46%';
       } else if (step.action === 'cameraDetects') {
         $('camera').querySelector('.cone').style.opacity = '1';
-        const b = $('scene-badge'); b.textContent = 'PLACA DETECTADA'; b.style.opacity = '1';
+        const b = $('scene-badge'); b.textContent = 'FRAME CAPTURADO'; b.style.opacity = '1';
       }
     } else if (step.phase === 'bridge') {
       // mantém a cena; flyBridge faz o cross-fade no meio do voo
