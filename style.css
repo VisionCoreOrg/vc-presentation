@@ -448,35 +448,10 @@ body {
   mask-image: radial-gradient(circle at 30% 50%, #000 0%, transparent 70%);
 }
 .demo-grid {
-  display: grid;
-  grid-template-columns: 1.3fr 0.7fr;
-  gap: 6vmin;
-  align-items: center;
-}
-.demo-list {
-  list-style: none;
-  margin-top: 3vmin;
-  display: flex;
-  flex-direction: column;
-  gap: 2vmin;
-}
-.demo-list li {
-  position: relative;
-  padding-left: 3vmin;
-  color: var(--text);
-  font-size: clamp(1.1rem, 2.2vmin, 1.5rem);
-}
-.demo-list li::before {
-  content: "▸";
-  position: absolute;
-  left: 0;
-  color: var(--neon);
-}
-.demo-right {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2vmin;
+  gap: 5vmin;
 }
 .demo-btn {
   display: inline-block;
@@ -497,11 +472,6 @@ body {
   outline: 3px solid var(--neon);
   outline-offset: 4px;
 }
-.demo-hint {
-  color: var(--text-dim);
-  font-size: 1rem;
-}
-
 .roadmap h1 {
   max-width: 26ch;
   margin-top: 1.5vmin;
